@@ -241,7 +241,8 @@
         const data = await response.json();
         
         // Handle logic if data is an object with a link or just a string
-        let finalUrl = data.url || (typeof data === 'string' && data.includes('youtube.com') ? data : null);
+        //let finalUrl = data.url || (typeof data === 'string' && data.includes('youtube.com') ? data : null);
+        let finalUrl = data.youtube || data.url || (typeof data === 'string' && data.includes('youtube.com') ? data : null);
 
         if (finalUrl) {
           resCard.innerHTML = `
