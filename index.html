@@ -226,7 +226,18 @@
       resDiv.style.display = "none";
 
       try {
-        const response = await fetch(`${API_BASE}/extract?url=${encodeURIComponent(url)}`);
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s = 2 minutes
+		const response = await fetch(
+		  `${API_BASE}/extract?url=${encodeURIComponent(url)}`,
+		  {
+		    signal: controller.signal,
+		    mode: "cors"
+		  }
+		);
+		clearTimeout(timeoutId);
+
+        
         const data = await response.json();
         
         // Handle logic if data is an object with a link or just a string
