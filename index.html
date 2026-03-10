@@ -100,7 +100,14 @@
     #result { margin-top: 20px; display: none; }
     .result-card { background: #080808; padding: 20px; border-radius: 16px; border: 1px solid var(--border); text-align: center; }
     .yt-link { color: var(--accent); font-weight: 600; word-break: break-all; text-decoration: none; font-size: 14px; display: block; margin-bottom: 15px; }
-    .error-msg { color: var(--error); font-size: 14px; }
+    /*.error-msg { color: var(--error); font-size: 14px; }*/
+    .error-msg {
+        color: var(--error);
+        font-size: 14px;
+        text-align: center;
+        display: block;
+        margin-top: 10px;
+    }
 
     .copy-btn { width: 100%; background: #222; font-size: 12px; padding: 10px; }
 
@@ -111,16 +118,16 @@
 <body>
 
   <div class="container">
-    <h1>ACS Extractor</h1>
-    <p class="subtitle">Extract video links effortlessly</p>
+    <h1>ACS Video Extractor</h1>
+    <p class="subtitle">Paste class link to get the YouTube video</p>
 
     <div class="status-box">
       <div class="status-header">
         <div class="indicator-group">
           <div id="statusDot" class="dot"></div>
-          <span id="statusText">System: Locked</span>
+          <span id="statusText">Server offline</span>
         </div>
-        <button id="wakeBtn" class="btn-wake" onclick="verifySystem()">Verify Bot</button>
+        <button id="wakeBtn" class="btn-wake" onclick="verifySystem()">Connect</button>
       </div>
       <div id="progressCont" class="progress-container">
         <div id="progressBar" class="progress-bar"></div>
@@ -128,8 +135,8 @@
     </div>
 
     <div id="mainActions" class="input-group">
-      <input type="text" id="videoUrl" placeholder="https://acsfutureschool.com/live/...">
-      <button id="extractBtn" onclick="getLink()">Extract Video</button>
+      <input type="text" id="videoUrl" placeholder="Enter ACS class URL">
+      <button id="extractBtn" onclick="getLink()">Get YouTube Link</button>
     </div>
 
     <div id="result">
@@ -139,7 +146,7 @@
   </div>
 
   <div class="footer">
-    Developed by <a href="mailto:name1ess404@proton.me" style="color:#777; text-decoration:none; font-weight:600;">name1ess404@proton.me</a>
+    Made by <a href="mailto:name1ess404@proton.me" style="color:#777; text-decoration:none; font-weight:600;">name1ess404@proton.me</a>
   </div>
 
   <script>
@@ -181,10 +188,11 @@
 
       dot.classList.add('pulsing');
       progCont.style.display = "block";
-      txt.innerText = "Waking bot (60s)...";
+      txt.innerText = "Starting server (~45s)...";
       
       let p = 0;
-      const interval = setInterval(() => { if(p < 95) p += 1; progBar.style.width = p + "%"; }, 600);
+      //const interval = setInterval(() => { if(p < 95) p += 1; progBar.style.width = p + "%"; }, 600);
+      const interval = setInterval(() => { if(p < 95) p += 1; progBar.style.width = p + "%"; }, 500);
 
       const retry = setInterval(async () => {
         try {
@@ -200,7 +208,7 @@
 
     function unlockUI() {
       document.getElementById('statusDot').className = "dot online";
-      document.getElementById('statusText').innerText = "System Ready";
+      document.getElementById('statusText').innerText = "Server Online";
       document.getElementById('statusText').style.color = "#10b981";
       document.getElementById('wakeBtn').style.display = "none";
       document.getElementById('progressCont').style.display = "none";
@@ -216,13 +224,20 @@
 
       // STRICT VALIDATION
       const validPrefix = "https://acsfutureschool.com/";
+      //if (!url.startsWith(validPrefix)) {
+        //alert("Invalid Link! Must start with: " + validPrefix);
+        //return;
+      //}
       if (!url.startsWith(validPrefix)) {
-        alert("Invalid Link! Must start with: " + validPrefix);
-        return;
+          const resDiv = document.getElementById("result");
+          const resCard = document.getElementById("resultCard");
+          resCard.innerHTML = `<span class="error-msg">Invalid Link! Must start with: ${validPrefix}</span>`;
+          resDiv.style.display = "block";
+          return;
       }
 
       btn.disabled = true;
-      btn.innerText = "Extracting... Please wait";
+      btn.innerText = "Getting YouTube link...";
       resDiv.style.display = "none";
 
       try {
@@ -250,7 +265,8 @@
             <button class="copy-btn" onclick="copyResult()">Copy Link</button>
           `;
         } else {
-          resCard.innerHTML = `<span class="error-msg">No YouTube link found on that page.</span>`;
+          //resCard.innerHTML = `<span class="error-msg">No YouTube link found on that page.</span>`;
+          resCard.innerHTML = `<span class="error-msg">No video detected. Try again after the class loads.</span>`;
         }
         resDiv.style.display = "block";
       } catch (e) {
