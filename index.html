@@ -222,19 +222,20 @@
       const resDiv = document.getElementById("result");
       const resCard = document.getElementById("resultCard");
 
-      // STRICT VALIDATION
-      const validPrefix = "https://acsfutureschool.com/";
-      //if (!url.startsWith(validPrefix)) {
-        //alert("Invalid Link! Must start with: " + validPrefix);
-        //return;
-      //}
-      if (!url.startsWith(validPrefix)) {
+	  // STRICT VALIDATION
+      const validPrefixes = [
+        "https://acsfutureschool.com/",
+        "https://www.acsfutureschool.com/"
+      ];
+
+      if (!validPrefixes.some(prefix => url.startsWith(prefix))) {
           const resDiv = document.getElementById("result");
           const resCard = document.getElementById("resultCard");
-          resCard.innerHTML = `<span class="error-msg">Invalid Link! Must start with: ${validPrefix}</span>`;
+          resCard.innerHTML = `<span class="error-msg">Invalid Link! Must be ACS link</span>`;
           resDiv.style.display = "block";
           return;
       }
+
 
       btn.disabled = true;
       btn.innerText = "Getting YouTube link...";
@@ -263,6 +264,9 @@
           resCard.innerHTML = `
             <a href="${finalUrl}" target="_blank" class="yt-link" id="linkText">${finalUrl}</a>
             <button class="copy-btn" onclick="copyResult()">Copy Link</button>
+            <div id="copyMsg" style="font-size:12px; margin-top:8px; color:#10b981; display:none;">
+              Copied to clipboard ✓
+            </div>
           `;
         } else {
           //resCard.innerHTML = `<span class="error-msg">No YouTube link found on that page.</span>`;
@@ -278,11 +282,20 @@
       }
     }
 
-    function copyResult() {
-      const link = document.getElementById("linkText").innerText;
-      navigator.clipboard.writeText(link);
-      alert("Link copied to clipboard!");
-    }
+	function copyResult() {
+	  const link = document.getElementById("linkText").innerText;
+	  const msg = document.getElementById("copyMsg");
+	
+	  navigator.clipboard.writeText(link).then(() => {
+	    msg.style.display = "block";
+	
+	    setTimeout(() => {
+	      msg.style.display = "none";
+	    }, 2000);
+	  });
+	}
+
+    
   </script>
 </body>
 </html>
