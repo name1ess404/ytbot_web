@@ -227,7 +227,7 @@
 	    } else if (res.status === 403) {
 	      // Block everything
 	      dot.className = "dot";
-	      txt.innerText = "Unauthorized Device!";
+	      txt.innerHTML = `Unauthorized Device!<br>Your Device ID:<br><b>${deviceId}</b>`;
 	      txt.style.color = "#ef4444";
 	      progCont.style.display = "none";
 	      btn.disabled = true;
