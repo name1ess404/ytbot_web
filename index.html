@@ -112,7 +112,20 @@
     .copy-btn { width: 100%; background: #222; font-size: 12px; padding: 10px; }
 
     .note { font-size: 11px; color: #444; text-align: center; margin-top: 20px; line-height: 1.5; }
-    .footer { margin-top: 30px; font-size: 12px; color: #555; text-align: center; }
+    
+    .footer { margin-top: 30px; margin-bottom: 30px; font-size: 12px; color: #555; text-align: center; }
+
+    #adminBtn {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      font-size: 12px;
+      opacity: 0.5;      /* semi-transparent */
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #222;
+    }
+    #adminBtn:hover { opacity: 1; }
   </style>
 </head>
 <body>
@@ -145,16 +158,99 @@
     </div>
   </div>
 
+  <div id="adminModal" style="
+    display:none;
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(2px);
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+  ">
+    <div style="
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 20px;
+      width: 320px;
+      text-align:center;
+      border:1px solid var(--border);
+    ">
+      <h2 style="margin-bottom:15px;">Admin Access</h2>
+      <input type="password" id="adminPassInput" placeholder="Enter admin password" style="
+        width: 100%; padding: 12px; border-radius:12px; border:1px solid #333; margin-bottom:12px; background:#080808; color:#fff;
+      ">
+      <input type="text" id="deviceIdInput" placeholder="Device ID to allow" style="
+        width: 100%; padding: 12px; border-radius:12px; border:1px solid #333; margin-bottom:15px; background:#080808; color:#fff;
+      ">
+      <button onclick="submitAdmin()" style="width:100%; padding:12px; border-radius:12px; background:var(--accent); color:#fff; font-weight:700;">Allow Device</button>
+      <button onclick="closeAdminModal()" style="width:100%; padding:12px; margin-top:10px; border-radius:12px; background:#222; color:#fff;">Cancel</button>
+      <div id="adminError" style="color: var(--error); font-size:13px; margin-top:10px;"></div>
+    </div>
+  </div>
+
+
+  
+
   <div class="footer">
     Made by <a href="mailto:name1ess404@proton.me" style="color:#777; text-decoration:none; font-weight:600;">name1ess404@proton.me</a>
   </div>
 
+  <button id="adminBtn" class="btn-wake" onclick="showAdminModal()">Admin Access</button>
 
 
 
   
 
   <script>
+
+
+    //Admin Button Function------------------------------------
+    // Show the admin modal
+    function showAdminModal() {
+      document.getElementById("adminModal").style.display = "flex";
+      document.getElementById("adminError").innerText = "";
+      document.getElementById("adminPassInput").value = "";
+      document.getElementById("deviceIdInput").value = "";
+    }
+    
+    // Close the modal
+    function closeAdminModal() {
+      document.getElementById("adminModal").style.display = "none";
+    }
+    
+    // Submit admin form
+    function submitAdmin() {
+      const pass = document.getElementById("adminPassInput").value.trim();
+      const deviceToAllow = document.getElementById("deviceIdInput").value.trim();
+      const errorBox = document.getElementById("adminError");
+    
+      if (!pass || !deviceToAllow) {
+        errorBox.innerText = "Both fields are required!";
+        return;
+      }
+    
+      fetch(`${API_BASE}/allow-device`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId: deviceToAllow, adminPass: pass })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert(`Device ${deviceToAllow} allowed! ✅`);
+          closeAdminModal();
+        } else {
+          errorBox.innerText = data.error || "Failed to allow device!";
+        }
+      })
+      .catch(() => {
+        errorBox.innerText = "Server error!";
+      });
+    }
+    //----------------------------------------------------------
+
+    
 
     // Check if device has an ID
     let deviceId = localStorage.getItem("acsDeviceId");
@@ -227,14 +323,78 @@
 	    } else if (res.status === 403) {
 	      // Block everything
 	      dot.className = "dot";
-	      txt.innerHTML = `
-	        <div style="text-align:center; line-height:1.5;">
-	          <span style="font-weight:600; font-size:16px;">Unauthorized Device!</span><br>
-	          Send this Device ID to get access:<br>
-	          <input type="text" value="${deviceId}" readonly style="margin-top:5px; padding:5px; font-size:14px; text-align:center; width:100%; border-radius:6px; border:1px solid #333;" onclick="this.select(); document.execCommand('copy');"><br>
-	          <span style="font-size:13px; color:#777;">Email: <a href="mailto:name1ess404@proton.me" style="color:#777; text-decoration:none;">name1ess404@proton.me</a></span>
-	        </div>
-	      `;
+		  //UI of Device ID------------------------------------------------------------------------
+		  txt.innerHTML = `
+		  <div style="width:100%; text-align:center;">
+		  
+		    <div style="
+		      font-weight:700;
+		      color:#ef4444;
+		      margin-bottom:6px;
+		    ">
+		      Unauthorized Device
+		    </div>
+		  
+		    <div style="
+		      font-size:12px;
+		      color:#9ca3af;
+		      margin-bottom:8px;
+		    ">
+		      Send this Device ID to get access
+		    </div>
+		  
+		    <div id="deviceBox" style="
+		      background:#080808;
+		      border:1px solid #262626;
+		      border-radius:10px;
+		      padding:8px;
+		      font-family:monospace;
+		      font-size:13px;
+		      cursor:pointer;
+		      user-select:none;
+		    ">
+		      ${deviceId}
+		    </div>
+		  
+		    <div style="
+		      font-size:11px;
+		      color:#777;
+		      margin-top:6px;
+		    ">
+		      Tap ID to copy
+		    </div>
+		  
+		    <div style="
+		      font-size:11px;
+		      color:#555;
+		      margin-top:6px;
+		    ">
+		      Contact: 
+		      <a href="mailto:name1ess404@proton.me"
+		         style="color:#777;text-decoration:none;">
+		         name1ess404@proton.me
+		      </a>
+		    </div>
+		  
+		  </div>
+		  `;
+		  
+		  setTimeout(() => {
+		    const box = document.getElementById("deviceBox");
+		    if (box) {
+		      box.onclick = () => {
+		        navigator.clipboard.writeText(deviceId);
+		        box.innerText = "Copied ✓";
+		        setTimeout(() => {
+		          box.innerText = deviceId;
+		        }, 1500);
+		      };
+		    }
+		  }, 50);
+		  //----------------------------------------------------------------------------------
+
+
+	      
 	      txt.style.color = "#ef4444";
 	      progCont.style.display = "none";
 	      btn.disabled = true;
