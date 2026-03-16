@@ -172,7 +172,7 @@
     const API_BASE = "https://yt-extractor-0j91.onrender.com";
     
     // BUG-FREE CHECKER LOGIC
-    async function verifySystem() {
+    /*async function verifySystem() {
       const btn = document.getElementById('wakeBtn');
       const dot = document.getElementById('statusDot');
       const txt = document.getElementById('statusText');
@@ -205,7 +205,43 @@
       } catch (err) {
         startWakeCycle();
       }
-    }
+    }*/
+
+	async function verifySystem() {
+	  const btn = document.getElementById('wakeBtn');
+	  const dot = document.getElementById('statusDot');
+	  const txt = document.getElementById('statusText');
+	  const progCont = document.getElementById('progressCont');
+	  const progBar = document.getElementById('progressBar');
+	
+	  btn.disabled = true;
+	  btn.innerText = "Checking...";
+	
+	  try {
+	    const res = await fetch(`${API_BASE}/ping`, {
+	      headers: { "x-device-id": deviceId }
+	    });
+	
+	    if (res.ok) {
+	      unlockUI(); // show inputs
+	    } else if (res.status === 403) {
+	      // Block everything
+	      dot.className = "dot";
+	      txt.innerText = "Unauthorized Device!";
+	      txt.style.color = "#ef4444";
+	      progCont.style.display = "none";
+	      btn.disabled = true;
+	      btn.innerText = "Access Denied";
+	    } else {
+	      startWakeCycle();
+	    }
+	  } catch (err) {
+	    startWakeCycle();
+	  }
+	}
+
+
+    
 
     function startWakeCycle() {
       const dot = document.getElementById('statusDot');
