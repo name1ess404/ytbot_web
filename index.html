@@ -227,7 +227,14 @@
 	    } else if (res.status === 403) {
 	      // Block everything
 	      dot.className = "dot";
-	      txt.innerHTML = `Unauthorized Device!<br>Your Device ID:<br><b>${deviceId}</b>`;
+	      txt.innerHTML = `
+	        <div style="text-align:center; line-height:1.5;">
+	          <span style="font-weight:600; font-size:16px;">Unauthorized Device!</span><br>
+	          Send this Device ID to get access:<br>
+	          <input type="text" value="${deviceId}" readonly style="margin-top:5px; padding:5px; font-size:14px; text-align:center; width:100%; border-radius:6px; border:1px solid #333;" onclick="this.select(); document.execCommand('copy');"><br>
+	          <span style="font-size:13px; color:#777;">Email: <a href="mailto:name1ess404@proton.me" style="color:#777; text-decoration:none;">name1ess404@proton.me</a></span>
+	        </div>
+	      `;
 	      txt.style.color = "#ef4444";
 	      progCont.style.display = "none";
 	      btn.disabled = true;
