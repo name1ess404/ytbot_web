@@ -204,6 +204,11 @@
 
   <script>
 
+	const WORKER_URL = "https://allowed-api.name1ess404.workers.dev";
+
+
+  
+
 
     //Admin Button Function------------------------------------
     // Show the admin modal
@@ -220,7 +225,8 @@
     }
     
     // Submit admin form
-    function submitAdmin() {
+    async function submitAdmin() {
+    
       const pass = document.getElementById("adminPassInput").value.trim();
       const deviceToAllow = document.getElementById("deviceIdInput").value.trim();
       const errorBox = document.getElementById("adminError");
@@ -230,23 +236,31 @@
         return;
       }
     
-      fetch(`${API_BASE}/allow-device`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceId: deviceToAllow, adminPass: pass })
-      })
-      .then(res => res.json())
-      .then(data => {
+      try {
+    
+        const res = await fetch(WORKER_URL + "/add", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            deviceId: deviceToAllow,
+            password: pass
+          })
+        });
+    
+        const data = await res.json();
+    
         if (data.success) {
-          alert(`Device ${deviceToAllow} allowed! ✅`);
+          alert("Device allowed!");
           closeAdminModal();
         } else {
-          errorBox.innerText = data.error || "Failed to allow device!";
+          errorBox.innerText = data.error || "Failed";
         }
-      })
-      .catch(() => {
-        errorBox.innerText = "Server error!";
-      });
+    
+      } catch (e) {
+        errorBox.innerText = "Worker error";
+      }
     }
     //----------------------------------------------------------
 
@@ -426,7 +440,12 @@
 
       const retry = setInterval(async () => {
         try {
-          const check = await fetch(`${API_BASE}/ping`, { mode: 'cors' });
+          const check = await fetch(`${API_BASE}/ping`, {
+            mode: "cors",
+            headers: {
+              "x-device-id": deviceId
+            }
+          });
           if (check.ok) {
             clearInterval(retry);
             clearInterval(interval);
